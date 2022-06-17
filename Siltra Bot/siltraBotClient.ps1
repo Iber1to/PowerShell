@@ -3,50 +3,71 @@
         Bot para el mantenimiento desantedido de la aplicacion Siltra.    
     
     .DESCRIPTION
-        El botcliente mantiene actualizada la instalacion del cliente Siltra o bien lo instala, tambien instalara Java si no esta instalado si el dispositivo no lo tiene instalado previamente. 
-        El botcliente necesita tener acceso a una carpeta compartida, donde el botServidor crea los archivos para la instalación/actualizacion y el archivo para el control de versiones del cliente.
-        El control de versiones se realiza mediante el hash del archivo Siltra.jar. Si el hash es distinto en el archivo de versiones que el del cliente, este se actualizara a la version del servidor. 
+        El botcliente mantiene actualizada la instalacion del cliente Siltra con la ultima version o bien la instala. Tambien instalara Java si el dispositivo no lo tiene instalado. 
+        El botcliente necesita tener acceso a una carpeta compartida, donde el botServidor crea los archivos para la instalación o actualizacion y el archivo para el control de versiones.
+        El control de versiones se realiza mediante el hash del archivo Siltra.jar. Si el hash es distinto en el archivo de versiones que el instalado en el cliente, este se actualizara a la version del servidor. 
         Todos los procesos realizados durante la ejecucion del botcliente quedan registrados en el archivo C:\windows\temp\nombredemaquina_siltraBot.log . El tamaño maximo para el archivo de log es de 100MB.
 
     .VARIABLES CONFIGURABLES
-        En la seccion 'Variables Cliente' al inicio del script, se pueden configurar las siguientes variables:
-            - '$PathCMTracelog' Ruta donde se creara el archivo de log.
-            - '$pathServerBot' Ruta de la carpeta compartida donde estan los archivos necesarios para el funcioanmiento del cliente. Tienen que existir los siguientes archivos para el correcto funcionamiento del bot:
-                * 'actu_guion.xml' Archivo para la instalación silen
+        En la seccion 'Variables Cliente' al inicio del script, se deben configurar las siguientes variables:
+            - '$PathCMTracelog'. Ruta donde se creara el archivo de log.
+            - '$pathServerBot'. Ruta de la carpeta compartida donde estan los archivos necesarios para el funcioanmiento del cliente. Tienen que existir los siguientes archivos para el correcto funcionamiento del bot:
+                * 'actu_guion.xml'. Archivo para la actualizacion desantedida de Siltra.
+                * 'actuSILTRAxxx.jar'. Archivo para la actualizacion de Siltra. 'xxx' sera la version en el momento de hacer este desarrollo vamos por la version 3.1.3
+                * 'currentversion.txt'. Archivo donde el botservidor deja el numero de la ultima version descargada. Lo consultara cada vez que haga un checkeo para comparar la ultima version descargada con la presente en la web.
+                * 'guion.xml'. Archivo para la instalación desatendida de Siltra.
+                * 'JavaSetup8u333.exe'. Archivo para la instalación de Java. Si se actualiza la version de Java ahi que actualizar la variable de configuración '$javaMachinePath'
+                * 'SILTRA313.jar'. Archivo para la instalacion del cliente Siltra. 'xxx' sera la version en el momento de hacer este desarrollo vamos por la version 3.1.3
+                * 'siltraversionServer.txt'. Archivo con el Hash del archivo Siltra.jar instalado en el servidor.
+            - '$pathSiltraInstall'. Ruta del archivo Siltra.jar . Se usara para comprobar si Siltra esta instalado y sacar la version instalada.
+            - '$javaMachinePath'. Ruta del archivo java.exe. Se utiliza tanto para lanzar la instalacion/actualizacion de Siltra, como para detectar si Java esta instalado.
+    
+    .FUNCIONES
+        - 'Write-CMTracelog'. Genera las entradas del archivo log. Necesita de la variable '$PathCMTracelog' para funcionar correctamente.
+        - 'testSiltraInstall'. Comprueba que Siltra esta instalado.
+        - 'checkSiltraVersion'. Comprueba que la version de Siltra en el cliente, es la misma que en el servidor. 
+        - 'installJava'. Instala Java.
+        - 'installSiltra' Instala Siltra.
+    
+    .ISSUES
+        Estos son los errores más comunes detectados. Los listo de más frecuente a menos. 
+            - Fallo de conectividad. El equipo cliente no tiene acceso al recurso compartido.
+            - Fallo en la instalacion o actualización de Siltra. Esto ocurre porque hay una versión de Java instalada distinta a la declarada en '$javaMachinePath'.
+            
 
     .VERSION
-        1.0
+        1.0 - 17 de Junio del año 2022
 
     .NOTES
         Author:  Alejandro Aguado Garcia
         Website: https://www.linkedin.com/in/alejandro-aguado-08882a31/
         Twitter: @Alejand94399487
-#> 
+#>
 
 function Write-CMTracelog {
 
     <#
     .SYNOPSIS
-        A�ade una entrada a un archivo log
+        Añade una entrada a un archivo log
     
     .DESCRIPTION
-        A�ade entradas a un archivo log existente o crea uno nuevo
+        Añade entradas a un archivo log existente o crea uno nuevo
     
     .PARAMETER Path
         Ruta del archivo. Si se omite hay que configurar el parametro PathCMTracelog
     
     .PARAMETER PathCMTracelog
-        Variable a declarar en el script que use la funci�n con la ruta del archivo log.
+        Variable a declarar en el script que use la función con la ruta del archivo log.
         Se usa para evitar estar pasando constantemente el parametro 'Path' 
     
     .PARAMETER Message
-        Contenido a a�adir en la entrada.
+        Contenido a añadir en la entrada.
     
     .PARAMETER Component
-        Componente que a�ade la entrada al log. Por defecto a�ade la propia funci�n.
+        Componente que añade la entrada al log. Por defecto añade la propia función.
     
     .PARAMETER Type
-        Tipo de mensaje a a�arir. El valor por defecto es 'Information' . Los otros valores son 
+        Tipo de mensaje a añarir. El valor por defecto es 'Information' . Los otros valores son 
         'Warning' y 'Error'
     
     .EXAMPLE
@@ -99,7 +120,7 @@ function Write-CMTracelog {
         "thread=`"$([Threading.Thread]::CurrentThread.ManagedThreadId)`" " + `
         "file=`"`">"
     
-    # A�ade la linea al archivo log   
+    # Añade la linea al archivo log   
     Add-Content -Path $Path -Value $Content
 }
 function testSiltraInstall {

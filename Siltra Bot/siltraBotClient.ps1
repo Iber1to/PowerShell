@@ -210,16 +210,7 @@ if (Test-Path $PathCMTracelog) {
     }
 }
 
-Write-CMTracelog "Iniciando Bot en cliente"
-
-#Esto es solo para el entorno de pruebas
-$UserName = 'alex'
-$PlainPassword = '123456'
-$SecurePassword = $PlainPassword | ConvertTo-SecureString -AsPlainText -Force
-$Credentials = New-Object System.Management.Automation.PSCredential -ArgumentList $UserName, $SecurePassword
-New-PSDrive -Name SiltraServer -PSProvider FileSystem -Root $pathServerBot -Credential $Credentials | Out-null
-# Fin de la parte para el entorno de pruebas
-     
+Write-CMTracelog "Iniciando Bot en cliente"    
 $listJarFiles = Get-ChildItem "$pathServerBot\*.jar"
 $actuSiltra = "-jar " + (($listJarFiles | Where-Object -FilterScript { $_.Name -match 'actu' }).FullName) + " " + "$pathServerBot\actu_guion.xml"
 $installSiltra = "-jar " + (($listJarFiles | Where-Object -FilterScript { $_.Name -notmatch 'actu' }).FullName) + " " + "$pathServerBot\guion.xml"
@@ -227,7 +218,7 @@ $installSiltra = "-jar " + (($listJarFiles | Where-Object -FilterScript { $_.Nam
 if ((testSiltraInstall $pathSiltraInstall) -eq $false) {
     $tempinstall = installSiltra $javaMachinePath $installSiltra $pathServerBot
     if ($tempinstall -eq $true) {
-        Write-CMTracelog "Finalizando Bot en cliente" -Path $PathCMTracelog # no hace falta poner la variable $pathCMTracelog es solo para que el Visual Code no me el error de que esta declarada pero sin uso. 
+        Write-CMTracelog "Finalizando Bot en cliente" -Path $PathCMTracelog # no hace falta poner la variable $pathCMTracelog es solo para que el Visual Code no de la turra con el error "de que esta declarada pero sin uso".
         return $true
     }
     else {

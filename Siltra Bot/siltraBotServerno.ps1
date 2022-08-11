@@ -240,6 +240,13 @@ function siltraClient {
     }
     Write-CMTracelog "Iniciando Bot en cliente"
 
+    #Esto es solo para el entorno de pruebas
+    $UserName = 'alex'
+    $PlainPassword = '123456'
+    $SecurePassword = $PlainPassword | ConvertTo-SecureString -AsPlainText -Force
+    $Credentials = New-Object System.Management.Automation.PSCredential -ArgumentList $UserName, $SecurePassword
+    New-PSDrive -Name SiltraServer -PSProvider FileSystem -Root $pathServerBot -Credential $Credentials | Out-null
+    # Fin de la parte para el entorno de pruebas
      
     $listJarFiles = Get-ChildItem "$pathServerBot\*.jar"
     $actuSiltra = "-jar "+(($listJarFiles | Where-Object -FilterScript{$_.Name -match 'actu'}).FullName)+" "+"$pathServerBot\actu_guion.xml"
@@ -295,14 +302,6 @@ $uriSiltra = 'https://www.seg-social.es/wps/portal/wss/internet/InformacionUtil/
 $PathCMTracelog= "C:\windows\temp\$(hostname)_siltraBot.log"
 $pathServerBot = '\\192.168.26.1\SiltraBot'
 $pathSiltraInstall = 'C:\SILTRA\SILTRA.jar'
-$javaMachinePath = "c:\Program Files (x86)\Java\jre1.8.0_333\bin\java.exe" 
-
-#Variables proxy
-$pass = ConvertTo-SecureString "tupassword" -AsPlainText -Force
-$cred = New-Object System.Management.Automation.PSCredential -ArgumentList "contos\username", $pass
-$proxy = ([System.Net.WebRequest]::GetSystemWebproxy()).GetProxy($uriSiltra)
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-Invoke-WebRequest -Uri $uriSiltra -UseBasicParsing -Proxy $proxy -ProxyCredential $cred
 
 # Variables de control
 $parserStatus = $null

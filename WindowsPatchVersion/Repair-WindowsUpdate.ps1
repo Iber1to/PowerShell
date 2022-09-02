@@ -39,7 +39,7 @@ if((Test-RegistryValue -Path $regPath -Value 'Repair3') -eq $false){
       Exit 1
 }
 
-# if all 4 registry keys exist, we continue to see what repair to launch
+# if all registry keys exist, we continue to see what repair to launch
 $updateState = Get-ItemPropertyValue -Path $regPath -Name 'UpdateValid'
 
 # Cheking if repair is necessary
@@ -148,8 +148,7 @@ if((Test-RegistryValue -Path $regPath -Value 'Repair1Date') -eq $false){
 }
 
 # Checking if sufficient time has passed
-$repair1Date = Get-ItemPropertyValue -Path $regPath -Name 'Repair1Date'
-$repair1Date = [DateTime]$repair1Date.Repair1Date
+$repair1Date = [dateTime]$(Get-ItemPropertyValue -Path $regPath -Name 'Repair1Date')
 $timeElapsedRepair1 = New-TimeSpan -Start $repair1Date -End $(Get-Date)
 if (($timeElapsedRepair1.Days) -le $daysBetweenRepairs){
      Write-Output 'Time elapsed since repair1 not sufficient'

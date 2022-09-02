@@ -19,7 +19,7 @@ function Test-RegistryValue {
 }
 
 $regPath = 'HKLM:\SOFTWARE\Iber0\UpdateState\' # Record Output last executión
-$daysBetweenRepairs = '30'
+$daysBetweenRepairs = '30' # Time in days, which has to elapse before each repair is launched
 
 # Checking whether the registry entries exist
 if((Test-RegistryValue -Path $regPath -Value 'UpdateValid') -eq $false){
@@ -140,7 +140,7 @@ if($repair1State -eq '0'){
 }
 
 
-## For launch repair2, repair1 had to be launched more than 30 days ago
+## For launch repair2, repair1 had to be launched more than days ago defined in $daysBetweenRepairs
 # Checking whether the registry entry exist
 if((Test-RegistryValue -Path $regPath -Value 'Repair1Date') -eq $false){
      Write-Output 'Repair1Date value registry not found'

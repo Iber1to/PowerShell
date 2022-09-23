@@ -1,15 +1,14 @@
-#Busca la fecha mas reciente en un array
  <#
     .SYNOPSIS
-        List all Wifi Networks in range
+        Find the last date in an array
     
     .DESCRIPTION
-        List all Wifi Networks in range with these properties:
-            SSID - Index- Network Type - Authentication - Encryption - BSSID1 - Signal - Wifi Mode - Frecuency - Channel
-        Only show the properties of one bssid if both bssids are active.
+        Find the last date in an array
+    
     
     .EXAMPLE
-         Get-WifiNetworks
+        $Date = $Searcher.QueryHistory(0, $HistoryCount) |  UltimaFecha 
+
     
     .NOTES
         Author:  Alejandro Aguado Garcia

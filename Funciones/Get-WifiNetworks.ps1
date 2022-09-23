@@ -74,3 +74,4 @@ function Get-WifiNetworks{
         }
     return $Wifynetworks
     }
+

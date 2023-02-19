@@ -20,12 +20,13 @@
 
 .NOTES
     Autor: Alejandro Aguado García
-    Fecha de creación: [Fecha de creación del script]
-    Última modificación: [Fecha de última modificación]
-    Versión:  1.0.0
+    Fecha de creación: 17-02-2023
+    Última modificación: 19-02-2023
+    Versión:  1.0.1
     Linkedin: https://www.linkedin.com/in/alejandro-aguado-08882a31/
     Github:   https://github.com/Iber1to
     Twitter:  @Alejand94399487
+    1.0.1: Se ha añadido la posibilidad de que el nombre del archivo de registro sea el nombre del equipo más el del script que lo llama.
 #>
 function Write-SimpleLog([string]$Message, [ValidateSet("INFO", "WARNING", "ERROR")] [string]$LogLevel = "INFO") {
     # Generate log file name using script name and current date

@@ -18,7 +18,7 @@ $Headers = @{
             'Content-Type'  = "application\json"
             'Authorization' = "Bearer $Token" }
 ############################################################################################
-function Send-Mail-Outha {
+function Send-mailOutha {
   param (
     [string]$MsgFrom,
     [string]$EmailRecipient,

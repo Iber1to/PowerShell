@@ -32,17 +32,29 @@
 #>
 function Add-RegistryEntry {
     param (
+        [ValidateSet("HKLM:\", "HKCU:\", "HKCR:\", "HKU:\", "HKCC:\")]
+        [string]$hive,
         [Parameter(Mandatory)]
         [string]$Path,
+        [Parameter(Mandatory)]
         [string]$RegistryName,
-        [string]$Value,
         [ValidateSet("String", "Binary", "DWord", "MultiString", "ExpandString", "QWord", "unknown")]
-        [string]$ValueType
+        [string]$ValueType,
+        [string]$Value
     )
-
-    if (-not (Test-Path $Path)) {
-        try{New-Item -Path $Path -Force | Out-Null} catch {return "Unable to create registry key $Path"}
+    $pathFull = $hive + $path
+    if (-not (Test-Path $pathFull)) {
+        try{
+            New-Item -Path $pathFull -Force | Out-Null
+        } catch {
+            return "Unable to create registry key $pathFull"
+        }
     }
-
-    try{New-ItemProperty -Path $Path -Name $RegistryName -Value $Value -PropertyType $ValueType -Force | Out-Null} catch {return "Unable to create registry entry $RegistryName"}
+    if (-not (Get-ItemProperty -Path $pathFull -Name $RegistryName -ErrorAction SilentlyContinue)) {
+        try{
+            New-ItemProperty -Path $pathFull -Name $RegistryName -Value $Value -PropertyType $ValueType -Force | Out-Null
+        } catch {
+            return "Unable to create registry entry $RegistryName"
+        }
+    }
 }

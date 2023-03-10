@@ -1,5 +1,5 @@
 
-# Params to authenticate with O365
+# Params to authenticate with O365 witouth MSAL through Azure App Registration
 $AppId = "000000-0000-0000-0000-000000000000"
 $AppSecret = "yourownsecret"
 $TenantId = "0000000-0000-0000-0000-000000000000"
@@ -41,7 +41,7 @@ $MessageParams = @{
   "URI"         = "https://graph.microsoft.com/v1.0/users/$MsgFrom/sendMail"
   "Headers"     = $Headers
   "Method"      = "POST"
-  "ContentType" = 'application/json'
+  "ContentType" = 'application/json;Charset="UTF-8"' #Characater Codification of the message are here
   "Body" = (@{
   "message" = @{
   "subject" = $MsgSubject

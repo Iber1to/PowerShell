@@ -23,7 +23,7 @@
 
 .VERSION
     1.0.1 15-03-2023
-    - Modify the function to return a message if the registry entry already exists.
+    - Modify the function to overwrite the value if the registry entry already exists.
     - Modify comments "ValueType" to show the name values of the registry entry types as they appear in the registry editor.    
 
 .NOTES
@@ -55,14 +55,9 @@ function Add-RegistryEntry {
             return Write-Output "Unable to create registry key $pathFull"
         }
     }
-    if (-not (Get-ItemProperty -Path $pathFull -Name $RegistryName -ErrorAction SilentlyContinue)) {
-        try{
-            New-ItemProperty -Path $pathFull -Name $RegistryName -Value $Value -PropertyType $ValueType -Force | Out-Null
-        } catch {
-            return Write-Output "Unable to create registry entry $RegistryName"
-        }
-    }
-    else {
-        return Write-Output "Registry entry $RegistryName already exists"
+    try{
+        New-ItemProperty -Path $pathFull -Name $RegistryName -Value $Value -PropertyType $ValueType -Force | Out-Null
+    } catch {
+        return Write-Output "Unable to create registry entry $RegistryName"
     }
 }

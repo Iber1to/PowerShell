@@ -16,7 +16,7 @@
     This command delete a registry entry named "MyEntry" to the path "HKCU:\Software\MyApp".
 
 .VERSION
-    1.0.0 21-03-2023   
+    1.0.0 21-03-2023
 
 .NOTES
     Autor: Alejandro Aguado García
@@ -42,13 +42,15 @@ function Remove-RegistryEntry {
     }
     If($RegistryName){
         try{
-        Remove-ItemProperty -Path $pathFull -Name $RegistryName -Force
+        Remove-ItemProperty -Path $pathFull -Name $RegistryName -Force -ErrorAction Stop | Out-Null
+        return $true
         } catch {
         return Write-Output "Unable to remove registry entry $RegistryName"
         }
     } else {
         try{
-        Remove-Item -Path $pathFull -Force
+        Remove-Item -Path $pathFull -Force -ErrorAction Stop | Out-Null
+        return $true
         } catch {
         return Write-Output "Unable to remove registry key $pathFull"
         }

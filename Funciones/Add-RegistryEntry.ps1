@@ -23,8 +23,12 @@
 
 .VERSION
     1.0.1 15-03-2023
-    - Modify the function to overwrite the value if the registry entry already exists.
-    - Modify comments "ValueType" to show the name values of the registry entry types as they appear in the registry editor.    
+        - Modify the function to overwrite the value if the registry entry already exists.
+        - Modify comments "ValueType" to show the name values of the registry entry types as they appear in the registry editor.
+    1.0.2 21-03-2023
+        - Fix the function to create the registry entry if the value is "Binary".
+        - Fixed a bug that function continued execution if try-catching failed.
+        
 
 .NOTES
     Autor: Alejandro Aguado García
@@ -48,16 +52,25 @@ function Add-RegistryEntry {
         [string]$Value
     )
     $pathFull = $hive + $path
+    if(($value)-and (-not $ValueType)){ throw "You must specify the ValueType parameter." }
     if (-not (Test-Path $pathFull)) {
         try{
-            New-Item -Path $pathFull -Force | Out-Null
+            New-Item -Path $pathFull -Force -ErrorAction Stop | Out-Null
         } catch {
             return Write-Output "Unable to create registry key $pathFull"
         }
     }
-    try{
-        New-ItemProperty -Path $pathFull -Name $RegistryName -Value $Value -PropertyType $ValueType -Force | Out-Null
-    } catch {
-        return Write-Output "Unable to create registry entry $RegistryName"
+    if($ValueType -eq "Binary"){ 
+        $ValueBinary = [System.Text.Encoding]::ASCII.GetBytes($Value)
+        try{
+            New-ItemProperty -Path $pathFull -Name $RegistryName -Value $ValueBinary -PropertyType $ValueType -Force -ErrorAction Stop | Out-Null
+            return $true
+        } catch {return Write-Output "Unable to create registry entry $RegistryName"}
+    }
+    else{
+        try{
+            New-ItemProperty -Path $pathFull -Name $RegistryName -Value $Value -PropertyType $ValueType -Force -ErrorAction Stop | Out-Null
+            return $true
+        } catch { return Write-Output "Unable to create registry entry $RegistryName" }
     }
 }

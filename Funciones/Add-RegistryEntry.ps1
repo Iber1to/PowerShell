@@ -69,6 +69,15 @@ function Add-RegistryEntry {
         }
     }
     if((-not ($RegistryName)) -and (-not ($ValueType)) -and (-not ($Value))){return $true}
+    if((($RegistryName)) -and (-not ($ValueType)) -and (-not ($Value))){
+        try{
+            New-ItemProperty -Path $pathFull -Name $RegistryName -Force -ErrorAction Stop | Out-Null
+            return $true
+        }catch{ 
+            Write-Host $Error[0].exception.message
+            return $false
+        }
+    }
     if(($value)-and ($ValueType) -and ($RegistryName))
         {
         if($ValueType -eq "Binary"){ 

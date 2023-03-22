@@ -4,6 +4,7 @@
 
 .DESCRIPTION
     This function delete an existing registry entry at the specified path with the specified name and value.
+    If parameter "RegistryName" is not specified, the function delete the entire branch.
 
 .PARAMETER Path
     The path of the registry entry.
@@ -14,6 +15,9 @@
 .EXAMPLE
     Delete-RegistryEntry -Path "HKCU:\Software\MyApp" -RegistryName "MyEntry" 
     This command delete a registry entry named "MyEntry" to the path "HKCU:\Software\MyApp".
+
+    Delete-RegistryEntry -Path "HKCU:\Software\MyApp"
+    This command delete the entire branch "HKCU:\Software\MyApp".
 
 .VERSION
     1.0.0 21-03-2023
@@ -38,21 +42,24 @@ function Remove-RegistryEntry {
     )
     $pathFull = $hive + $path
     if (-not (Test-Path $pathFull)) {
-        return Write-Output "Unable to localized registry key $pathFull"
+        Write-Host "Unable to localized registry key $pathFull"
+        return $false
     }
     If($RegistryName){
         try{
         Remove-ItemProperty -Path $pathFull -Name $RegistryName -Force -ErrorAction Stop | Out-Null
         return $true
-        } catch {
-        return Write-Output "Unable to remove registry entry $RegistryName"
+        }catch{
+            Write-Host $Error[0].exception.message
+            return $false
         }
     } else {
         try{
-        Remove-Item -Path $pathFull -Force -ErrorAction Stop | Out-Null
-        return $true
-        } catch {
-        return Write-Output "Unable to remove registry key $pathFull"
+            Remove-Item -Path $pathFull -Force -Recurse -ErrorAction Stop | Out-Null
+            return $true
+        }catch{
+            Write-Host $Error[0].exception.message
+            return $false
         }
     }
 }

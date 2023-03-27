@@ -307,9 +307,7 @@ foreach ($user in $notifyUsers)
     <br>
     <p><b> We recommend you to change your password as soon as possible.</b></p> <br>
     If you have questions about how to change your password, please review the following information.<br><br>
-    <p> Español:<a href="" https://resetpassword.telxius.com/RDWeb/Pages/en-US/instrucciones/ES.pdf"">Instrucciones para el cambio de contraseña en dominio Telxius</a><br>
-    English:<a href="" https://resetpassword.telxius.com/RDWeb/Pages/en-US/instrucciones/EN.pdf"">Instructions for password reset in Telxius domain</a><br>
-    Português:<a href="" https://resetpassword.telxius.com/RDWeb/Pages/en-US/instrucciones/BR.pdf"">Instruções para alterar a senha no domínio Telxius</a><br>
+    <p>https://resetpasswordapps.telxius.com/<br>
     <p> <br> 
     </P>
 	</td>
@@ -390,8 +388,7 @@ foreach ($user in $notifyUsers)
 }
 
 ############################################################################## New parameters for O365 send mail ##############################################################################
-$fileName=(Get-Item -Path $logFile).name
-$base64String = [Convert]::ToBase64String([IO.File]::ReadAllBytes($logFile))
+
 function Send-mailOutha2 {
     param (
       [string]$MsgFrom,
@@ -400,6 +397,8 @@ function Send-mailOutha2 {
       [string]$HtmlMsg
     )
 
+    $fileName=(Get-Item -Path $logFile).name
+    $base64String = [Convert]::ToBase64String([IO.File]::ReadAllBytes($logFile))  
   # Create message body and properties and send
   $MessageParams = @{
     "URI"         = "https://graph.microsoft.com/v1.0/users/$MsgFrom/sendMail"

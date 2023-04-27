@@ -25,7 +25,7 @@ function Get-InstalledApplications() {
     if ($GlobalAndAllUsers -or $AllUsers) {
         $RunningAsAdmin = (New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
         if ($RunningAsAdmin -eq $false) {
-            Write-Output "Finding all user applications requires administrative privileges"
+            Write-Host "Finding all user applications requires administrative privileges"
             exit 1
         }
     }

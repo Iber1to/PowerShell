@@ -61,13 +61,16 @@ $PSDefaultParameterValues['*:Encoding'] = 'utf8'
     Twitter:  @Alejand94399487
     1.0.1: Se ha añadido la posibilidad de que el nombre del archivo de registro sea el nombre del equipo más el del script que lo llama.
 #>
+#Saco fuera la generacion del archivo de log para que este accesible luego en el output
+# Generate log file name using script name and current date
+$ScriptName = [System.IO.Path]::GetFileNameWithoutExtension($PSCommandPath)
+$HostName = ($env:COMPUTERNAME)
+$HostName = $HostName.SubString(0,1).ToUpper()+$HostName.SubString(1).ToLower()
+$LogFileName = $HostName+$ScriptName+"_"+$(Get-Date -Format 'yyyyMMdd')+".log"
+$LogPath = "C:\InetumLogs\$LogFileName"
+
 function Write-SimpleLog([string]$Message, [ValidateSet("INFO", "WARNING", "ERROR")] [string]$LogLevel = "INFO") {
-    # Generate log file name using script name and current date
-    $ScriptName = [System.IO.Path]::GetFileNameWithoutExtension($PSCommandPath)
-    $HostName = ($env:COMPUTERNAME)
-    $HostName = $HostName.SubString(0,1).ToUpper()+$HostName.SubString(1).ToLower()
-    $LogFileName = $HostName+$ScriptName+"_"+$(Get-Date -Format 'yyyyMMdd')+".log"
-    $LogPath = "C:\InetumLogs\$LogFileName"
+    
 
     # Create logs folder if it doesn't exist
     if (-not (Test-Path -Path "C:\InetumLogs")) {
@@ -121,34 +124,34 @@ function Get-InstalledApplications() {
 
     # Retreive globally insatlled applications
     if ($Global -or $GlobalAndAllUsers -or $GlobalAndCurrentUser) {
-        Write-Host "Processing global hive"
+        # Write-Host "Processing global hive"
         $Apps += Get-ItemProperty "HKLM:\$32BitPath"
         $Apps += Get-ItemProperty "HKLM:\$64BitPath"
     }
 
     if ($CurrentUser -or $GlobalAndCurrentUser) {
-        Write-Host "Processing current user hive"
+        # Write-Host "Processing current user hive"
         $Apps += Get-ItemProperty "Registry::\HKEY_CURRENT_USER\$32BitPath"
         $Apps += Get-ItemProperty "Registry::\HKEY_CURRENT_USER\$64BitPath"
     }
 
     if ($AllUsers -or $GlobalAndAllUsers) {
-        Write-Host "Collecting hive data for all users"
+        # Write-Host "Collecting hive data for all users"
         $AllProfiles = Get-CimInstance Win32_UserProfile | Select-Object LocalPath, SID, Loaded, Special | Where-Object {$_.SID -like "S-1-5-21-*"}
         $MountedProfiles = $AllProfiles | Where-Object {$_.Loaded -eq $true}
         $UnmountedProfiles = $AllProfiles | Where-Object {$_.Loaded -eq $false}
 
-        Write-Host "Processing mounted hives"
+        # Write-Host "Processing mounted hives"
         $MountedProfiles | ForEach-Object {
             $Apps += Get-ItemProperty -Path "Registry::\HKEY_USERS\$($_.SID)\$32BitPath"
             $Apps += Get-ItemProperty -Path "Registry::\HKEY_USERS\$($_.SID)\$64BitPath"
         }
 
-        Write-Host "Processing unmounted hives"
+        # Write-Host "Processing unmounted hives"
         $UnmountedProfiles | ForEach-Object {
 
             $Hive = "$($_.LocalPath)\NTUSER.DAT"
-            Write-Host " -> Mounting hive at $Hive"
+            # Write-Host " -> Mounting hive at $Hive"
 
             if (Test-Path $Hive) {
             
@@ -164,7 +167,7 @@ function Get-InstalledApplications() {
                 REG UNLOAD HKU\temp
 
             } else {
-                Write-Warning "Unable to access registry hive at $Hive"
+                # Write-Warning "Unable to access registry hive at $Hive"
             }
         }
     }
@@ -190,7 +193,7 @@ if($UninstallqBittorent){Start-Process $UninstallqBittorent $Arguments; Write-Si
 
 #Eliminando uTorrent
 $UninstallUtorrent = ((Get-InstalledApplications | Where-Object Displayname -Like "*µTorrent*").UninstallString)
-$UninstallUtorrent = (($UninstallUtorrent.split("/")[0]).trim())
+if($UninstallUtorrent){$UninstallUtorrent = (($UninstallUtorrent.split("/")[0]).trim())}
 $Arguments = "/UNINSTALL /S"
 if($UninstallUtorrent){Start-Process $UninstallUtorrent.split("/")[0] $Arguments; Write-SimpleLog -Message "Se ha eliminado uTorrent" -LogLevel "INFO"}
 

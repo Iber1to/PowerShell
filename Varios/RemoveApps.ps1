@@ -67,7 +67,7 @@ $ScriptName = [System.IO.Path]::GetFileNameWithoutExtension($PSCommandPath)
 $HostName = ($env:COMPUTERNAME)
 $HostName = $HostName.SubString(0,1).ToUpper()+$HostName.SubString(1).ToLower()
 $LogFileName = $HostName+$ScriptName+"_"+$(Get-Date -Format 'yyyyMMdd')+".log"
-$LogPath = "C:\ProgramData\RemoveappsLogs\$LogFileName"
+$LogPath = "C:\CosentinoLogs\$LogFileName"
 
 function Write-SimpleLog([string]$Message, [ValidateSet("INFO", "WARNING", "ERROR")] [string]$LogLevel = "INFO") {
     

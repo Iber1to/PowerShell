@@ -73,8 +73,8 @@ function Write-SimpleLog([string]$Message, [ValidateSet("INFO", "WARNING", "ERRO
     
 
     # Create logs folder if it doesn't exist
-    if (-not (Test-Path -Path "C:\InetumLogs")) {
-        New-Item -ItemType Directory -Path "C:\InetumLogs" | Out-Null
+    if (-not (Test-Path -Path "C:\ProgramData\RemoveappsLogs")) {
+        New-Item -ItemType Directory -Path "C:\ProgramData\RemoveappsLogs" | Out-Null
     }
 
     # Format log message

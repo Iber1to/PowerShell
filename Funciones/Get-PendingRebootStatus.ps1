@@ -74,6 +74,6 @@ Function Get-PendingRebootStatus {
         }
       
         END {}
-    }
+}
 
 # $(Get-PendingRebootStatus).PendingReboot

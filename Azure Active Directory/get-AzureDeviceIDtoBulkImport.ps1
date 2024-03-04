@@ -1,4 +1,5 @@
 #Parametros
+# No se puede hacer con el import de Intune, el ObjectID que pide el import Bulk es el del export de Azure con ninguno de los de Intune sirve. 
 #Este fichero deber ser el export devices de Azure y tiene que contener las columnas "displayName" y "objectId"
 $ficheroAzureCsv = "C:\Users\aleja\Downloads\exportDevice_2023-6-23.csv"
 #El fichero debe contener una columna "displayName" con el nombre del dispositivo

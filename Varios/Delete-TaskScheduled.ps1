@@ -1,5 +1,5 @@
 
-#region FUNCTION
+#region log
 function Write-CMTracelog {
     [CmdletBinding()]
     Param(
@@ -47,8 +47,6 @@ function Write-CMTracelog {
     # Add the line to the log file   
     Add-Content -Path $Path -Value $Content
 }
-#endregion FUNCTION
-
 #region "log parameters"
 $logpath  = 'C:\Windows\Temp'
 $username   = $env:USERNAME
@@ -60,6 +58,7 @@ $logfilename = Join-Path -Path $logpath -ChildPath $filename
 $PathCMTracelog = $logfilename
 $ComponentSource = $MyInvocation.MyCommand.Name
 #endregion "log parameters"
+#endregion log
 
 #region "Delete Task"
 Write-CMTracelog "Start execution: ${scriptname}" 

@@ -8,18 +8,22 @@
 .PARAMETER Path
     File path. If omitted, the variable PathCMTracelog parameter must be configured out of function.
 
-.PARAMETER PathCMTracelog
-    Variable to declare in the script that uses the function with the path to the log file.
-    Used to avoid constantly passing the 'Path' parameter.  
-
 .PARAMETER Message
     Content to be added to the entry.
 
 .PARAMETER Component
-    Component that adds the entry to the log. By default it adds the function itself.
+    Component that adds the entry to the log. If omitted, the variable ComponentSource parameter must be configured out of function.
 
 .PARAMETER Type
     Type of message to add. The default value is 'Information' . The other values are Warning' and 'Error'.
+
+.PARAMETER PathCMTracelog
+    Variable to declare in the script that uses the function with the path to the log file.
+    Used to avoid constantly passing the 'Path' parameter.
+    
+.PARAMETER ComponentSource
+    Variable to declare in the script that uses the function with the component that creates the log entry.
+    Used to avoid constantly passing the 'Component' parameter.
 
 .EXAMPLE
      $PathCMTracelog= 'C:\Temp\logalternativo.log'
@@ -50,7 +54,7 @@ function Write-CMTracelog {
                   
           [Parameter()]
           [ValidateNotNullOrEmpty()]
-          [String]$Component= $MyInvocation.MyCommand.Name,
+          [String]$Component,
 
           [Parameter()]
           [ValidateNotNullOrEmpty()]
@@ -60,6 +64,9 @@ function Write-CMTracelog {
 
     if(!$Path){
         $Path= $PathCMTracelog
+        }
+    if(!$Component){
+        $Component= $ComponentSource
         }
         
     switch ($Type) {

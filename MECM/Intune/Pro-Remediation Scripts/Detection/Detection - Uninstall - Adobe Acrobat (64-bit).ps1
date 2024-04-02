@@ -51,11 +51,11 @@ $logpath  = 'C:\Windows\Logs\Uninstall\'
 $username   = $env:USERNAME
 $hostname   = hostname
 $datetime   = Get-Date -f 'yyyyMMddHHmmss'
-$scriptname = "Remediation-Uninstall-WolfSecuritySuite"
-$filename   = "${scriptname}-${username}-${hostname}-${datetime}.log"
+$scriptname = "Detection-Uninstall-Adobe Acrobat (64-bit)"
+$filename   = "$scriptname-${username}-${hostname}-${datetime}.log"
 $logfilename = Join-Path -Path $logpath -ChildPath $filename
 $PathCMTracelog = $logfilename
-$ComponentSource = $MyInvocation.MyCommand.Name
+$ComponentSource = "Detection"
 #endregion "log parameters"
 # Test logpath
 if(-not (Test-Path $logpath)){
@@ -63,23 +63,19 @@ if(-not (Test-Path $logpath)){
 }
 #endregion log
 
-#region "Procces script"
-Write-CMTracelog "Start execution: ${scriptname}" 
- 
-try{
-    Write-CMTracelog "Uninstalling HP Wolf Security"
-    Start-Process -filepath "wmic" -argumentlist 'product where name="HP Wolf Security" call uninstall' -wait -WindowStyle Hidden
-    Write-CMTracelog "Uninstalling HP Wolf Security Completed" -Type Warning
-    }catch{Write-CMTracelog "$($_.Exception.Message)" -Component "WMIC" -Type Error}
-try{
-    Write-CMTracelog "Uninstalling HP Wolf Security - Console" 
-    Start-Process -filepath "wmic" -argumentlist 'product where name="HP Wolf Security - Console" call uninstall' -Wait -WindowStyle Hidden
-    Write-CMTracelog "Uninstalling HP Wolf Security - Console Completed" -Type Warning
-    }catch{Write-CMTracelog "$($_.Exception.Message)" -Component "WMIC" -Type Error}
-try{
-    Write-CMTracelog "Uninstalling HP Security Update Service"
-    Start-Process -filepath "wmic" -argumentlist 'product where name="HP Security Update Service" call uninstall' -Wait -WindowStyle Hidden
-    Write-CMTracelog "Uninstalling HP Security Update Service Completed" -Type Warning
-    }catch{ Write-CMTracelog "$($_.Exception.Message)" -Component "WMIC" -Type Error}
-
+#region "Procces"
+Write-CMTracelog "Start execution: $scriptname"
+Write-CMTracelog "Searching for Apps"
+$App001 = Get-Package | Where-Object {$_.Name -eq 'Adobe Acrobat (64-bit)'}
+if ($App001) {
+    Write-Host "App detected"
+    Write-CMTracelog "App detected"
+    Write-CMTracelog "End execution: $scriptname"
+    exit 1
+}else{
+    Write-CMTracelog "Not App detected"
+    Write-Host "Not App detected"
+    Write-CMTracelog "End execution: $scriptname"
+    exit 0
+}
 #endregion "Procces"

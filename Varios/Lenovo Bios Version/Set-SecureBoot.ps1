@@ -17,7 +17,7 @@
     Twitter: @Alejand94399487
 #>
 
-# Comprobar el estado de Secure Boot usando Lenovo_BiosSetting
+# Comprobar el estado de Secure Boot usando Lenovo_BiosSetting y Lenovo_SaveBiosSettings
 $currentSecureBootSetting01 = (Get-WmiObject -Namespace "root\wmi" -Class "Lenovo_BiosSetting" | Where-Object { $_.CurrentSetting -like "SecureBoot,*" }).CurrentSetting
 $currentSecureBootSetting02 = (Get-WmiObject -Namespace "root\wmi" -Class "Lenovo_BiosSetting" | Where-Object { $_.CurrentSetting -like "Secure Boot,*" }).CurrentSetting
 

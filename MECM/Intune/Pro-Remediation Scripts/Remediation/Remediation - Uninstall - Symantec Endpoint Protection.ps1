@@ -51,11 +51,11 @@ $logpath  = 'C:\Windows\Logs\Uninstall\'
 $username   = $env:USERNAME
 $hostname   = hostname
 $datetime   = Get-Date -f 'yyyyMMddHHmmss'
-$scriptname = "Remediation-Uninstall-WolfSecuritySuite"
-$filename   = "${scriptname}-${username}-${hostname}-${datetime}.log"
+$scriptname = "Remediation-Uninstall-Symantec Endpoint Protection"
+$filename   = "$scriptname-${username}-${hostname}-${datetime}.log"
 $logfilename = Join-Path -Path $logpath -ChildPath $filename
 $PathCMTracelog = $logfilename
-$ComponentSource = $MyInvocation.MyCommand.Name
+$ComponentSource = "Remediation"
 #endregion "log parameters"
 # Test logpath
 if(-not (Test-Path $logpath)){
@@ -64,22 +64,11 @@ if(-not (Test-Path $logpath)){
 #endregion log
 
 #region "Procces script"
-Write-CMTracelog "Start execution: ${scriptname}" 
+Write-CMTracelog "Start execution: $scriptname" 
  
 try{
-    Write-CMTracelog "Uninstalling HP Wolf Security"
-    Start-Process -filepath "wmic" -argumentlist 'product where name="HP Wolf Security" call uninstall' -wait -WindowStyle Hidden
-    Write-CMTracelog "Uninstalling HP Wolf Security Completed" -Type Warning
+    Write-CMTracelog "Uninstalling Symantec Endpoint Protection"
+    Start-Process -filepath "wmic" -argumentlist 'product where name="Symantec Endpoint Protection" call uninstall' -wait -WindowStyle Hidden
+    Write-CMTracelog "Uninstalling Symantec Endpoint Protection Completed" -Type Warning
     }catch{Write-CMTracelog "$($_.Exception.Message)" -Component "WMIC" -Type Error}
-try{
-    Write-CMTracelog "Uninstalling HP Wolf Security - Console" 
-    Start-Process -filepath "wmic" -argumentlist 'product where name="HP Wolf Security - Console" call uninstall' -Wait -WindowStyle Hidden
-    Write-CMTracelog "Uninstalling HP Wolf Security - Console Completed" -Type Warning
-    }catch{Write-CMTracelog "$($_.Exception.Message)" -Component "WMIC" -Type Error}
-try{
-    Write-CMTracelog "Uninstalling HP Security Update Service"
-    Start-Process -filepath "wmic" -argumentlist 'product where name="HP Security Update Service" call uninstall' -Wait -WindowStyle Hidden
-    Write-CMTracelog "Uninstalling HP Security Update Service Completed" -Type Warning
-    }catch{ Write-CMTracelog "$($_.Exception.Message)" -Component "WMIC" -Type Error}
-
 #endregion "Procces"

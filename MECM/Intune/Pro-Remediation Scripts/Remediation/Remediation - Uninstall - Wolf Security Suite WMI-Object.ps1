@@ -68,17 +68,17 @@ Write-CMTracelog "Start execution: ${scriptname}"
  
 try{
     Write-CMTracelog "Uninstalling HP Wolf Security"
-    Start-Process -filepath "wmic" -argumentlist 'product where name="HP Wolf Security" call uninstall' -wait -WindowStyle Hidden
+    (Get-WmiObject -Query "SELECT * FROM Win32_Product WHERE Name = 'HP Wolf Security'").uninstall()
     Write-CMTracelog "Uninstalling HP Wolf Security Completed" -Type Warning
     }catch{Write-CMTracelog "$($_.Exception.Message)" -Component "WMIC" -Type Error}
 try{
-    Write-CMTracelog "Uninstalling HP Wolf Security - Console" 
-    Start-Process -filepath "wmic" -argumentlist 'product where name="HP Wolf Security - Console" call uninstall' -Wait -WindowStyle Hidden
+    Write-CMTracelog "Uninstalling HP Wolf Security - Console"
+    (Get-WmiObject -Query "SELECT * FROM Win32_Product WHERE Name = 'HP Wolf Security - Console'").uninstall()
     Write-CMTracelog "Uninstalling HP Wolf Security - Console Completed" -Type Warning
     }catch{Write-CMTracelog "$($_.Exception.Message)" -Component "WMIC" -Type Error}
 try{
     Write-CMTracelog "Uninstalling HP Security Update Service"
-    Start-Process -filepath "wmic" -argumentlist 'product where name="HP Security Update Service" call uninstall' -Wait -WindowStyle Hidden
+    (Get-WmiObject -Query "SELECT * FROM Win32_Product WHERE Name = 'HP Security Update Service'").uninstall()
     Write-CMTracelog "Uninstalling HP Security Update Service Completed" -Type Warning
     }catch{ Write-CMTracelog "$($_.Exception.Message)" -Component "WMIC" -Type Error}
 

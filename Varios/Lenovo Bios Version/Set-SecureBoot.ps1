@@ -39,7 +39,7 @@ if ($currentSecureBootSetting01 -like "SecureBoot,Disable") {
 }
 
 # Option Bios 2 Disabled
-if ($currentSecureBootSetting02 -like "Secure Boot,Disabled") {
+if ($currentSecureBootSetting02 -like "Secure Boot,Disabled*") {
     Write-Output "Secure Boot no está habilitado. Intentando habilitarlo..."
  
     # Habilitar Secure Boot
@@ -62,7 +62,7 @@ if ($currentSecureBootSetting01 -like "SecureBoot,Enable") {
 }
 
 # Option Bios 4 Enabled
-if ($currentSecureBootSetting02 -like "Secure Boot,Enabled") {
+if ($currentSecureBootSetting02 -like "Secure Boot,Enabled*") {
     Write-Output "Secure Boot está habilitado."
     Exit 0
 }

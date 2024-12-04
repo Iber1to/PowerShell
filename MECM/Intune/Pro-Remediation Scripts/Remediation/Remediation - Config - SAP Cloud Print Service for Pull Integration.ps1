@@ -1,6 +1,23 @@
+#region log
+
+#region "log parameters"
+$logpath  = 'C:\Windows\Logs\Intune-Remediation\'
+$username   = $env:USERNAME
+$hostname   = hostname
+$datetime   = Get-Date -f 'yyyyMMddHHmmss'
+$scriptname = "Remediation - Config - SAP Cloud Print Service for Pull Integration"
+$filename   = "${scriptname}-${username}-${hostname}-${datetime}.log"
+$logfilename = Join-Path -Path $logpath -ChildPath $filename
+$PathCMTracelog = $logfilename
+$ComponentSource = $MyInvocation.MyCommand.Name
+#endregion "log parameters"
+# Test logpath
+if(-not (Test-Path $logpath)){
+	New-Item -ItemType Directory -Path $logpath -Force |Out-Null
+}
+#endregion log
 #region Configuraciones
 # ================================================
-$logFile = "C:\Windows\Logs\ServiceConfig.log" # Ruta del archivo de log
 $serviceName = 'Sap Cloud Print Service for Pull Integration' # Nombre del servicio
 
 # Generar datos aleatorios
@@ -11,43 +28,70 @@ $securePassword = ConvertTo-SecureString -String $password -AsPlainText -Force
 
 #region Funciones
 # ================================================
-function Log-Message {
-    param(
-        [string]$Message,
-        [string]$LogFile
-    )
-    # Obtener el directorio del archivo de log
-    $logDirectory = Split-Path -Path $LogFile -Parent
+function Write-CMTracelog {
+    [CmdletBinding()]
+    Param(
 
-    # Crear el directorio si no existe
-    if (-not (Test-Path -Path $logDirectory)) {
-        New-Item -Path $logDirectory -ItemType Directory -Force | Out-Null
+          [Parameter(Mandatory=$true)]
+          [String]$Message,
+            
+          [Parameter()]
+          [ValidateNotNullOrEmpty()]
+          [String]$Path,
+                  
+          [Parameter()]
+          [ValidateNotNullOrEmpty()]
+          [String]$Component,
+
+          [Parameter()]
+          [ValidateNotNullOrEmpty()]
+          [ValidateSet("Information", "Warning", "Error")]
+          [String]$Type = 'Information'
+    )
+
+    if(!$Path){
+        $Path= $PathCMTracelog
+        }
+    if(!$Component){
+        $Component= $ComponentSource
+        }
+        
+    switch ($Type) {
+        "Info" { [int]$Type = 1 }
+        "Warning" { [int]$Type = 2 }
+        "Error" { [int]$Type = 3 }
     }
 
-    # Escribir en el archivo de log
-    $timestamp = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
-    Add-Content -Path $LogFile -Value "$timestamp - $Message"
-    Write-Output "$timestamp - $Message"
+    # Create a CMTrace formatted entry
+    $Content = "<![LOG[$Message]LOG]!>" +`
+        "<time=`"$(Get-Date -Format "HH:mm:ss.ffffff")`" " +`
+        "date=`"$(Get-Date -Format "M-d-yyyy")`" " +`
+        "component=`"$Component`" " +`
+        "context=`"$([System.Security.Principal.WindowsIdentity]::GetCurrent().Name)`" " +`
+        "type=`"$Type`" " +`
+        "thread=`"$([Threading.Thread]::CurrentThread.ManagedThreadId)`" " +`
+        "file=`"`">"
+
+    # Add the line to the log file   
+    Add-Content -Path $Path -Value $Content
 }
-
-
-function Create-LocalUser {
-    param([string]$Username, [SecureString]$Password, [string]$LogFile)
+function Add-LocalUser {
+    param([string]$Username, [SecureString]$Password)
     if (-not (Get-LocalUser -Name $Username -ErrorAction SilentlyContinue)) {
         New-LocalUser -Name $Username -Password $Password -PasswordNeverExpires -UserMayNotChangePassword |Out-Null
-        Log-Message "Usuario $Username creado exitosamente." -LogFile $LogFile
+        Write-CMTracelog "User $Username created successfully." 
     } else {
-        Log-Message "El usuario $Username ya existe. Saltando creación." -LogFile $LogFile
+        Write-CMTracelog "The user $Username already exists." 
     }
 }
 
 function Add-ToAdministrators {
     param([string]$Username, [string]$LogFile)
     Add-LocalGroupMember -Group "Administradores" -Member $Username
-    Log-Message "Usuario $Username agregado al grupo Administradores." -LogFile $LogFile
+    Write-CMTracelog "User $Username added to Administrators group."
 }
 
-function Configure-Service {
+function Update-Service {
     param(
         [string]$ServiceName,
         [string]$Username,
@@ -57,100 +101,113 @@ function Configure-Service {
 
     # Paso 1: Configurar las credenciales para el servicio
     try {
-        Log-Message "Paso 1: Configurando credenciales para el servicio $ServiceName." -LogFile $LogFile
-        $result = sc.exe config $ServiceName obj= $Username password= $Password
+        Write-CMTracelog "Step 4.1: Configuring credentials for service $ServiceName." 
+        sc.exe config $ServiceName obj= $Username password= $Password | Out-Null
 
         if ($LASTEXITCODE -ne 0) {
-            throw "Falló la configuración de las credenciales para el servicio $ServiceName con el usuario $Username."
+            throw "Fail to configure credentials for service $ServiceName with user $Username."
         }
 
-        Log-Message "Credenciales configuradas correctamente para el servicio $ServiceName." -LogFile $LogFile
+        Write-CMTracelog "Credentials configured successfully for service $ServiceName."
     } catch {
-        Log-Message "Error en el Paso 1 (Configurar credenciales): $_" -LogFile $LogFile
+        Write-CMTracelog "Error in Step 4.1 (Configure credentials): $_"
         throw
     }
 
     # Paso 2: Configurar el inicio automático del servicio
     try {
-        Log-Message "Paso 2: Configurando el inicio automático del servicio $ServiceName." -LogFile $LogFile
+        Write-CMTracelog "Step 4.2: Configuring automatic startup for service $ServiceName."
         Set-Service -Name $ServiceName -StartupType Automatic
 
-        Log-Message "Inicio automático configurado correctamente para el servicio $ServiceName." -LogFile $LogFile
+        Write-CMTracelog "Automatic startup configured successfully for service $ServiceName." 
     } catch {
-        Log-Message "Error en el Paso 2 (Configurar inicio automático): $_" -LogFile $LogFile
+        Write-CMTracelog "Error in Step 4.2 (Configure automatic startup): $_"
         throw
     }
 
     # Paso 3: Iniciar el servicio
     try {
-        Log-Message "Paso 3: Intentando iniciar el servicio $ServiceName." -LogFile $LogFile
-        Start-Service -Name $ServiceName
+        Write-CMTracelog "Step 4.3: Starting service $ServiceName." 
+        Start-Service -Name $ServiceName | Out-Null
 
-        Log-Message "Servicio $ServiceName iniciado correctamente." -LogFile $LogFile
+        Write-CMTracelog "Service $ServiceName started successfully."
     } catch {
-        Log-Message "Error en el Paso 3 (Iniciar el servicio): $_" -LogFile $LogFile
+        Write-CMTracelog "Error in Step 4.3 (Start service): $_" 
         throw
     }
 }
 
 function Grant-ServiceLogonRight {
-    param([string]$Username, [string]$LogFile)
+    param([string]$Username)
 
     try {
         # Exportar la configuración actual
-        $configFile = "C:\Temp\ServiceLogonRights.cfg"
-        secedit /export /cfg $configFile
+        Write-CMTracelog "Export current configuration to file..."
+        $configFile = "C:\Windows\logs\ServiceLogonRights.cfg"
+        secedit /export /cfg $configFile |Out-Null
 
         # Leer el archivo de configuración y modificar el derecho SeServiceLogonRight
+        Write-CMTracelog "Modifying SeServiceLogonRight File..."
         $content = Get-Content $configFile
         $updatedContent = $content -replace "(?<=SeServiceLogonRight\s=\s).*", "`"$Username`""
         Set-Content -Path $configFile -Value $updatedContent
 
         # Aplicar los cambios
+        Write-CMTracelog "Applying changes..."
         secedit /configure /db secedit.sdb /cfg $configFile /areas USER_RIGHTS | Out-Null
 
-        Log-Message "Se asignó el derecho 'Iniciar sesión como un servicio' al usuario $Username." -LogFile $LogFile
+        # Eliminar el archivo de configuración
+        Write-CMTracelog "Removing temporary file..."
+        Remove-Item $configFile
+
+        Write-CMTracelog "Set the right 'Logon as a service' for $Username with success."
     } catch {
-        Log-Message "Error al asignar el derecho 'Iniciar sesión como un servicio': $_" -LogFile $LogFile
-        throw
+        Write-CMTracelog "Error in Set the right 'Logon as a service': $_"
     }
 }
-
 #endregion
+
+Write-CMTracelog "Start execution Script: ${scriptname}"
 
 #region Main
 # ================================================
+# Step 1: create user
 try {
-    Log-Message "Paso 1: Creación del usuario." -LogFile $logFile
-    Create-LocalUser -Username $usernameRandom -Password $securePassword -LogFile $logFile
+    Write-CMTracelog "Step 1: create user." 
+    Add-LocalUser -Username $usernameRandom -Password $securePassword 
 } catch {
-    Log-Message "Error al crear el usuario: $_" -LogFile $logFile
+    Write-CMTracelog "Error to create user: $_" 
     exit 1
 }
 
+# Step 2: Add user to administrators group
 try {
-    Log-Message "Paso 2: Asignando permisos de logon como servicio al usuario." -LogFile $logFile
-    Grant-ServiceLogonRight -Username $usernameRandom -LogFile $logFile
+    Write-CMTracelog "Step 2: Add user to Administrators group."
+    Add-ToAdministrators -Username $usernameRandom
 } catch {
-    Log-Message "Error al asignar permisos al usuario: $_" -LogFile $logFile
+    Write-CMTracelog "Error to add user to Administrators groups: $_" 
     exit 1
 }
 
+# Step 3: Grant user permissions to logon as a service
 try {
-    Log-Message "Paso 3: Agregando al grupo Administradores." -LogFile $logFile
-    Add-ToAdministrators -Username $usernameRandom -LogFile $logFile
+    Write-CMTracelog "Step 3: Add user permissions to logon as a service." 
+    Grant-ServiceLogonRight -Username $usernameRandom 
+
 } catch {
-    Log-Message "Error al agregar el usuario al grupo Administradores: $_" -LogFile $logFile
+    Write-CMTracelog "Error to add user permissions to logon as a service: $_" 
     exit 1
 }
 
+# Step 4: Configure the service
 try {
-    Log-Message "Paso 4: Configuración del servicio." -LogFile $logFile
-    Configure-Service -ServiceName $serviceName -Username ".\$usernameRandom" -Password $password -LogFile $logFile
+    Write-CMTracelog "Step 4: Configure the service." 
+    Update-Service -ServiceName $serviceName -Username ".\$usernameRandom" -Password $password 
 } catch {
-    Log-Message "Error al configurar el servicio: $_" -LogFile $logFile
-    exit 1
+    Write-CMTracelog "Error to configure the service: $_" 
 }
 
-Log-Message "Script completado con éxito." -LogFile $logFile
-#endregion
+Write-CMTracelog "Script ${scriptname} executed with success."
+Write-CMTracelog "End execution Script: ${scriptname}"
+exit 0
+#endregion 

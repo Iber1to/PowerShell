@@ -22,7 +22,7 @@ $serviceName = 'Sap Cloud Print Service for Pull Integration' # Nombre del servi
 
 # Generar datos aleatorios
 $usernameRandom = "RandoMUser_" + [guid]::NewGuid().ToString().Substring(0, 8)
-$password = -join ((33..126) | Get-Random -Count 16 | ForEach-Object {[char]$_})
+$password = -join ((48..57 + 65..90 + 97..122) | Get-Random -Count 16 | ForEach-Object {[char]$_})
 $securePassword = ConvertTo-SecureString -String $password -AsPlainText -Force
 #endregion
 
@@ -129,8 +129,12 @@ function Update-Service {
     try {
         Write-CMTracelog "Step 4.3: Starting service $ServiceName." 
         Start-Service -Name $ServiceName | Out-Null
-
-        Write-CMTracelog "Service $ServiceName started successfully."
+        # Verificar el estado del servicio
+        $service = Get-Service -Name $serviceName
+        if ($service.Status -eq 'Running') {Write-CMTracelog "Service $ServiceName started successfully."}
+        else{
+            Write-CMTracelog "Service $ServiceName failed to start, no detected running."
+            exit 1}
     } catch {
         Write-CMTracelog "Error in Step 4.3 (Start service): $_" 
         throw

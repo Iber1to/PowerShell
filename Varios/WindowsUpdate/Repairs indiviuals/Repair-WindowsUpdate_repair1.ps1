@@ -1,5 +1,5 @@
 # Deteniendo todos los servicios
-Get-Service -Name wuauserv,bits,cryptsvc,msiserver | Stop-Service
+Get-Service -Name wuauserv,bits,cryptsvc,msiserver,appidsvc | Stop-Service -Force
 
 # Elimina todos los archivos qmgr.dat para limpiar los jobs de Bits atascados
 Remove-Item -Path "$env:ALLUSERSPROFILE\Application Data\Microsoft\Network\Downloader\qmgr*.dat"
@@ -61,11 +61,18 @@ foreach ($dll in $dlls) {
      Remove-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate" -Name $_ -ErrorAction Ignore
 }
 
+# Reseteando la configuración de Winsock y WinHTTP
+netsh winsock reset 
+netsh winhttp reset proxy 
+
+# Borrando trabajos de BITS atascados
+$null = bitsadmin.exe /reset /allusers
+
 # Reiniciando la ACL para WUA
 $null = wuauclt.exe /resetauthorization
 
 # Vuelvo a arrancar los servicios
-Get-Service -Name wuauserv,bits,cryptsvc | Start-Service
+Get-Service -Name wuauserv,bits,cryptsvc,appidsvc | Start-Service
 
 # Reparar archivos dañados con DISM
 $processOptionsDism = @{
@@ -74,6 +81,12 @@ $processOptionsDism = @{
  }
  Start-Process @processOptionsDism
 
-#Lanzando la busqueda de actualizaciones
-(New-Object -ComObject Microsoft.Update.AutoUpdate).DetectNow()
+<# Modulo de gestion para Windows Update
+Install-Module PSWindowsUpdate -Force
+Import-Module PSWindowsUpdate
 
+Get-WUHistory #Get Windows Update history.
+Get-WUHistory -MaxDate (Get-Date).AddDays(-1) # Get Windows Update Agent history for last 24h.
+Get-WindowsUpdate #Get windows updates available from default service manager
+Install-WindowsUpdate -MicrosoftUpdate -AcceptAll -ForceInstall -Verbose #Install all available updates from Microsoft Update 
+#>

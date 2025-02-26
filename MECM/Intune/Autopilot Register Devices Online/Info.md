@@ -4,8 +4,6 @@
 Create an app in **Azure MS-Graph** with the following API permissions:
 
 - `DeviceManagementServiceConfig.ReadWrite.All`
-- `Directory.ReadWrite.All`
-- `GroupMember.ReadWrite.All`
 
 ## Authentication
 For the app's authentication, use the **"Secrets"** type for the key.

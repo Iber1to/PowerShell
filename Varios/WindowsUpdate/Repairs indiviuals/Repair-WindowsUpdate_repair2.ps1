@@ -888,7 +888,9 @@ foreach ($Item in $launch) {
 	if($item.status -eq 'Installed' -and $Item.Title  -notmatch 'Defender'){$msgOut += $item.title}
 }
 if($msgOut){Write-Output $msgOut}
-else{Write-Output '0 downloads'; exit 1}
+else{Write-Output '0 downloads'
+powercfg.exe -SETACTIVE $energyPlan
+exit 1}
 #I return to the energy configuration I had at the beginning. 
 powercfg.exe -SETACTIVE $energyPlan
 exit 0

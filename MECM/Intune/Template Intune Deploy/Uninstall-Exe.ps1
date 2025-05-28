@@ -27,7 +27,7 @@ function Write-SimpleLog([string]$Message, [ValidateSet("INFO", "WARNING", "ERRO
 
 # Setting this variable
 $installTitle = ""
-$ProcessName = ""
+$ProcessName = "NeverLeaveEmpty" # If you leave this variable empty, it will kill all processes.
 $UninstallFilePath = ""
 $Argumenlist = ""
 

@@ -26,12 +26,18 @@ function Write-SimpleLog([string]$Message, [ValidateSet("INFO", "WARNING", "ERRO
 #endRegion
 
 # Setting this variables
-$installTitle = "MongoDBCompass" # Not cant contains spaces, otherwise it will not work correctly (log problems)
+$installTitle = "" # Not cant contains spaces, otherwise it will not work correctly (log problems)
+
+# Test if the script is running with administrative privileges
+if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    $LogDirMSI = "C:\Users\$env:USERNAME\Documents\Logs\MSILogs\"
+} else {
+    $LogDirMSI = "C:\Windows\Logs\Software\MSILogs\"
+}
 
 # Statics variables
 $dirFiles = ".\Files"
 $MSIFile = "*.msi"
-$LogDirMSI = "C:\Users\$env:USERNAME\Documents\Logs\MSILogs\"
 $MSILogFullName = Join-Path -Path $LogDirMSI -ChildPath "$($installTitle)_install.log"
 $MSIPath = Get-ChildItem -Path "$dirFiles" -Include $MSIFile -File -Recurse -ErrorAction SilentlyContinue
 $Argumenlist = "/qn /norestart /L*V `"$msilogFullName`""

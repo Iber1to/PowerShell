@@ -27,12 +27,18 @@ function Write-SimpleLog([string]$Message, [ValidateSet("INFO", "WARNING", "ERRO
 
 # Setting this variables
 $installTitle = "" # Not cant contains spaces, otherwise it will not work correctly (log problems)
-$ProcessName = ""
+$ProcessName = "NeverLeaveEmpty" # If you leave this variable empty, it will kill all processes.
+
+# Test if the script is running with administrative privileges
+if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    $LogDirMSI = "C:\Users\$env:USERNAME\Documents\Logs\MSILogs\"
+} else {
+    $LogDirMSI = "C:\Windows\Logs\Software\MSILogs\"
+}
 
 # Statics variables
 $dirFiles = ".\Files"
 $MSIFile = "*.msi"
-$LogDirMSI = "C:\Users\$env:USERNAME\Documents\Logs\MSILogs\"
 $MSILogFullName = Join-Path -Path $LogDirMSI -ChildPath "$($installTitle)_uninstall.log"
 $MSIPath = Get-ChildItem -Path "$dirFiles" -Include $MSIFile -File -Recurse -ErrorAction SilentlyContinue
 $Argumenlist = "/x `"$($MSIPath.FullName)`" /qn /norestart /L*V `"$msilogFullName`""

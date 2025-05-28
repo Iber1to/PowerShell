@@ -1,0 +1,29 @@
+#InstallCommand
+%SystemRoot%\sysnative\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy Bypass -NoLogo -NonInteractive -WindowStyle Hidden -File .\Deploy-*.ps1
+
+#UninstallString
+%SystemRoot%\sysnative\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy Bypass -NoLogo -NonInteractive -WindowStyle Hidden -File .\Uninstall-*.ps1
+
+#Paquetizado Intune
+IntuneWinAppUtil.exe -c "E:\Paquetes Finales\*" -s "Deploy-*.ps1" -o "E:\Paquetes Finales\*\IntuneWin"
+
+#Detection Metod
+
+File
+MSI Code
+
+#Install detection values
+
+MSI Code :
+
+FileName		  : 
+PathFile		  :
+DisplayVersion      : 
+
+#InfoUrl
+https://
+
+#PrivacyURL
+https://
+
+#Description:

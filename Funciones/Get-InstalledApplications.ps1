@@ -78,4 +78,4 @@ function Get-InstalledApplications() {
     Write-Output $Apps
 }
 
-# Get-Installedapplications | Where-Object {$_.DisplayName -like "*teams*"} | Select-Object DisplayName, uninstallstring, QuietUninstallString
+ Get-Installedapplications | Where-Object {$_.DisplayName -like "*Postman*"} | Select-Object DisplayName, Displayversion, uninstallstring, QuietUninstallString

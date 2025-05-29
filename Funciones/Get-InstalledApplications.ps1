@@ -78,4 +78,4 @@ function Get-InstalledApplications() {
     Write-Output $Apps
 }
 
- Get-Installedapplications | Where-Object {$_.DisplayName -like "*Azure*"} | Select-Object DisplayName, Displayversion, uninstallstring, QuietUninstallString
+ Get-Installedapplications | Where-Object {$_.DisplayName -like "*Amazon*"} | Select-Object DisplayName, Displayversion, uninstallstring, QuietUninstallString

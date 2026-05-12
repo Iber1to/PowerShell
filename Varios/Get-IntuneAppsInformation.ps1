@@ -20,7 +20,7 @@ if ($missingModules.Count -gt 0) {
     Write-Host "Los siguientes módulos están faltando:" -ForegroundColor Yellow
     $missingModules | ForEach-Object { Write-Host " - $_" }
 } else {
-    Write-Host "✅ Todos los módulos requeridos están instalados." -ForegroundColor Green
+    Write-Host " Todos los módulos requeridos están instalados." -ForegroundColor Green
 }
 
 # Instalar los módulos faltantes
@@ -34,13 +34,13 @@ foreach ($module in $requiredModules) {
     if (-not (Get-Module -Name $module)) {
         try {
             Import-Module -Name $module -ErrorAction Stop
-            Write-Host "✅ Módulo '$module' importado correctamente." -ForegroundColor Green
+            Write-Host " Módulo '$module' importado correctamente." -ForegroundColor Green
         }
         catch {
-            Write-Host "❌ No se pudo importar el módulo '$module': $_" -ForegroundColor Red
+            Write-Host " No se pudo importar el módulo '$module': $_" -ForegroundColor Red
         }
     } else {
-        Write-Host "🟢 Módulo '$module' ya está cargado." -ForegroundColor Cyan
+        Write-Host " Módulo '$module' ya está cargado." -ForegroundColor Cyan
     }
 }
 

@@ -9,7 +9,7 @@ $graphApiVersion = "beta"
 $folderPath = Split-Path $csvPath
 if (-not (Test-Path $folderPath)) {
     New-Item -Path $folderPath -ItemType Directory -Force | Out-Null
-    Write-Host "📁 Carpeta creada: $folderPath"
+    Write-Host " Carpeta creada: $folderPath"
 }
 
 # ============================================
@@ -35,10 +35,10 @@ foreach ($module in $requiredModules) {
     if (-not (Get-Module -Name $module)) {
         try {
             Import-Module -Name $module -ErrorAction Stop
-            Write-Host "✅ Módulo '$module' importado." -ForegroundColor Green
+            Write-Host " Módulo '$module' importado." -ForegroundColor Green
         }
         catch {
-            Write-Host "❌ No se pudo importar el módulo '$module': $_" -ForegroundColor Red
+            Write-Host " No se pudo importar el módulo '$module': $_" -ForegroundColor Red
         }
     }
 }
@@ -100,11 +100,11 @@ foreach ($profile in $profiles) {
                 $group = Get-MgGroup -GroupId $groupId -ErrorAction SilentlyContinue
                 $groupName = if ($group) { $group.DisplayName } else { $groupId }
             } else {
-                $groupName = "❓ (GroupId vacío)"
+                $groupName = " (GroupId vacío)"
             }
         }
         default {
-            $groupName = "❓ Tipo de asignación no reconocido: $assignmentType"
+            $groupName = " Tipo de asignación no reconocido: $assignmentType"
         }
     }
 
@@ -121,10 +121,10 @@ foreach ($profile in $profiles) {
 # ============================================
 
 $results | Sort-Object ProfileName, GroupName | Export-Csv -Path $csvPath -NoTypeInformation -Encoding UTF8
-Write-Host "`n📤 Resultados exportados a: $csvPath" -ForegroundColor Green
+Write-Host "`n Resultados exportados a: $csvPath" -ForegroundColor Green
 
 # Mostrar en consola
-Write-Host "`n📋 Perfiles y asignaciones encontradas:" -ForegroundColor Cyan
+Write-Host "`n Perfiles y asignaciones encontradas:" -ForegroundColor Cyan
 $results | Format-Table -AutoSize
 
 Write-Host "`nTotal de perfiles procesados: $($profiles.Count)" -ForegroundColor Yellow
